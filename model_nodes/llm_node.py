@@ -19,6 +19,7 @@ from .protocols import (
     extract_gemini_text,
     extract_grok_text,
 )
+from ..proxy import PROXY_ADDRESS, PROXY_PASSWORD, PROXY_USERNAME, proxy_input_fields
 
 
 class MmuuAILLMModelNode:
@@ -50,6 +51,7 @@ class MmuuAILLMModelNode:
                 "回答详细度（GPT）": choice(("自动（模型默认）", "简洁", "标准", "详细")),
                 "推理模式（统一响应）": choice(("标准", "专业")),
                 "超时时间（秒，0不限）": ("INT", {"default": 600, "min": 0, "max": 2147483647, "step": 1}),
+                **proxy_input_fields(),
             },
             "optional": {
                 **optional,
@@ -87,7 +89,10 @@ class MmuuAILLMModelNode:
         base_url = values.get("URL") or values.get("base地址") or BASE_URL
         if base_url == URL_CUSTOM_OPTION:
             base_url = values.get("自定义URL") or ""
-        client = UKClient(api_key, values.get("超时时间（秒，0不限）", 600), base_url)
+        client = UKClient(
+            api_key, values.get("超时时间（秒，0不限）", 600), base_url,
+            values.get(PROXY_ADDRESS, ""), values.get(PROXY_USERNAME, ""), values.get(PROXY_PASSWORD, ""),
+        )
         try:
             return self._request(client, platform, model, images, videos, values)
         except Exception as exc:

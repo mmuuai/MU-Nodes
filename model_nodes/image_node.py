@@ -15,6 +15,7 @@ from .common import (
 from .media import MAX_IMAGES, decode_image_batch, image_data_uri, multipart_images
 from .models import IMAGE_MODEL_IDS, resolve_model
 from .protocols import build_gemini, build_grok_image
+from ..proxy import PROXY_ADDRESS, PROXY_PASSWORD, PROXY_USERNAME, proxy_input_fields
 
 IMAGE_REQUEST_MODES = (
     "账号模式（OAuth）",
@@ -95,6 +96,7 @@ class MmuuAIImageModelNode:
                 "质量": choice(("自动", "low", "medium", "high")),
                 "审核强度": choice(("自动（上游默认）", "低")),
                 "超时时间（秒，0不限）": ("INT", {"default": 600, "min": 0, "max": 2147483647, "step": 1}),
+                **proxy_input_fields(),
             },
             "optional": {
                 **{f"图片{i}": ("IMAGE",) for i in range(1, MAX_IMAGES + 1)},
@@ -125,7 +127,10 @@ class MmuuAIImageModelNode:
         base_url = values.get("URL") or values.get("base地址") or BASE_URL
         if base_url == URL_CUSTOM_OPTION:
             base_url = values.get("自定义URL") or ""
-        client = UKClient(api_key, values.get("超时时间（秒，0不限）", 600), base_url)
+        client = UKClient(
+            api_key, values.get("超时时间（秒，0不限）", 600), base_url,
+            values.get(PROXY_ADDRESS, ""), values.get(PROXY_USERNAME, ""), values.get(PROXY_PASSWORD, ""),
+        )
         try:
             result = self._request(client, platform, model, images, values)
             result = client.poll_image_task(result)

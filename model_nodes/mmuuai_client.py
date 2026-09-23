@@ -8,6 +8,7 @@ from urllib.parse import quote, urljoin, urlsplit
 import requests
 
 from .client import MAX_IMAGE_BYTES, MAX_RESPONSE_BYTES, sanitize
+from ..proxy import configure_proxy
 
 
 BASE_URL = "https://api.mmuu.ai"
@@ -24,12 +25,13 @@ class MmuuAIHTTPError(RuntimeError):
 
 
 class MmuuAIClient:
-    def __init__(self, api_key, timeout, base_url=None, session=None):
+    def __init__(self, api_key, timeout, base_url=None, session=None, proxy="", proxy_username="", proxy_password=""):
         base_url = base_url or _configured_base_url()
         self.base_url = base_url.rstrip("/") + "/"
         self.wait_timeout = None if timeout == 0 else timeout
         self.timeout = (CONNECT_TIMEOUT_SECONDS, None if timeout == 0 else timeout)
         self.session = session or requests.Session()
+        configure_proxy(self.session, proxy, proxy_username, proxy_password)
         self.headers = {"Authorization": f"Bearer {api_key}"}
 
     def list_models(self):

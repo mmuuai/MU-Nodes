@@ -13,6 +13,7 @@ from .transcription import (
     transcribe_paraformer,
     upload_transcription_file,
 )
+from ..proxy import PROXY_ADDRESS, PROXY_PASSWORD, PROXY_USERNAME, proxy_input_fields, configure_proxy
 
 
 MODELS = (
@@ -43,6 +44,7 @@ class MmuuAIMediaParserNode:
                 "轮询间隔（秒）": ("INT", {"default": 2, "min": 1, "max": 60, "step": 1}),
                 "超时时间（秒）": ("INT", {"default": 3600, "min": 60, "max": 2147483647, "step": 1}),
                 "关键说明": (KEY_INFO, {"default": KEY_INFO[0]}),
+                **proxy_input_fields(),
             },
             "optional": {
                 "视频文件": ("VIDEO",),
@@ -75,6 +77,10 @@ class MmuuAIMediaParserNode:
         base_url = self._preset(model)
         session = requests.Session()
         try:
+            configure_proxy(
+                session, values.get(PROXY_ADDRESS, ""), values.get(PROXY_USERNAME, ""),
+                values.get(PROXY_PASSWORD, ""),
+            )
             if model == MODELS[0]:
                 self._require_url(source_url)
                 summary, raw = extract_media(session, base_url, api_key, source_url, None, (30, timeout))

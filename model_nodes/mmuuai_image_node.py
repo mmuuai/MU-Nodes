@@ -5,6 +5,7 @@ from .mmuuai_client import MmuuAIClient
 from .mmuuai_media import uploaded_file
 from .mmuuai_parameters import build_parameters, upload_parameter
 from .models import IMAGE_MODEL_IDS
+from ..proxy import PROXY_ADDRESS, PROXY_PASSWORD, PROXY_USERNAME, proxy_input_fields
 
 
 class MmuuAIDirectImageModelNode:
@@ -29,6 +30,7 @@ class MmuuAIDirectImageModelNode:
                 "质量": choice(("自动", "low", "medium", "high")),
                 "审核强度": choice(("自动（上游默认）", "低")),
                 "超时时间（秒，0不限）": ("INT", {"default": 600, "min": 0, "max": 2147483647, "step": 1}),
+                **proxy_input_fields(),
             },
             "optional": {f"图片{i}": ("IMAGE",) for i in range(1, MAX_IMAGES + 1)},
         }
@@ -39,7 +41,9 @@ class MmuuAIDirectImageModelNode:
 
     def execute(self, **values):
         client = MmuuAIClient(
-            api_key_from_value(values["key"]), values["超时时间（秒，0不限）"]
+            api_key_from_value(values["key"]), values["超时时间（秒，0不限）"],
+            proxy=values.get(PROXY_ADDRESS, ""), proxy_username=values.get(PROXY_USERNAME, ""),
+            proxy_password=values.get(PROXY_PASSWORD, ""),
         )
         resource = client.resolve_model(
             values["模型"], values["自定义模型名称或ID"], IMAGE_MODEL_IDS

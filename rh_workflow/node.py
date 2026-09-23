@@ -2,6 +2,7 @@ import json
 
 from .api import RHClient
 from .media import audio_to_wav, image_to_png, video_to_file
+from ..proxy import PROXY_ADDRESS, PROXY_PASSWORD, PROXY_USERNAME, proxy_input_fields
 
 
 AUTO_FIELD = "自动识别"
@@ -54,6 +55,7 @@ class MmuuAIRHWorkflowNode:
                 "视频字段": field,
                 "轮询间隔（秒）": ("FLOAT", {"default": 3.0, "min": 1.0, "max": 30.0, "step": 0.5}),
                 "超时时间（秒，0不限）": ("INT", {"default": 1800, "min": 0, "max": 2147483647}),
+                **proxy_input_fields(),
             },
             "optional": {
                 "文本": ("STRING", {"forceInput": True}),
@@ -77,7 +79,10 @@ class MmuuAIRHWorkflowNode:
         if not connected:
             raise ValueError("至少连接一个文本、图片、音频或视频输入")
 
-        client = RHClient(api_key, values["超时时间（秒，0不限）"])
+        client = RHClient(
+            api_key, values["超时时间（秒，0不限）"], values.get(PROXY_ADDRESS, ""),
+            values.get(PROXY_USERNAME, ""), values.get(PROXY_PASSWORD, ""),
+        )
         try:
             workflow = client.get_workflow(workflow_id)
             node_info = []

@@ -9,6 +9,7 @@ from .common import (
     raw_response,
 )
 from .media import image_data_uri
+from ..proxy import PROXY_ADDRESS, PROXY_PASSWORD, PROXY_USERNAME, proxy_input_fields
 
 
 GOOGLE_IMAGE_RESOLUTIONS = ("自动", "1K", "2K", "4K")
@@ -39,6 +40,7 @@ class MmuuAIGoogleImageModelNode:
                 "分辨率": (GOOGLE_IMAGE_RESOLUTIONS, {"default": "自动"}),
                 "尺寸": (GOOGLE_IMAGE_SIZES, {"default": "自动"}),
                 "超时时间（秒，0不限）": ("INT", {"default": 600, "min": 0, "max": 2147483647, "step": 1}),
+                **proxy_input_fields(),
             },
             "optional": {
                 "思考级别": (GOOGLE_THINKING_LEVELS, {"default": "自动（模型默认）"}),
@@ -61,7 +63,10 @@ class MmuuAIGoogleImageModelNode:
         base_url = str(values.get("URL") or "").strip().rstrip("/")
         if not base_url:
             raise ValueError("请填写 Google 图片模型 URL")
-        client = UKClient(api_key, values.get("超时时间（秒，0不限）", 600), base_url)
+        client = UKClient(
+            api_key, values.get("超时时间（秒，0不限）", 600), base_url,
+            values.get(PROXY_ADDRESS, ""), values.get(PROXY_USERNAME, ""), values.get(PROXY_PASSWORD, ""),
+        )
         payload = self._payload(model, values, collect_images(values))
         try:
             images = collect_images(values)

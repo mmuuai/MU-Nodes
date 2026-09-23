@@ -6,6 +6,8 @@ from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
 import requests
 
+from ..proxy import redact_proxy_credentials
+
 try:
     import psutil
 except ImportError:  # ComfyUI normally provides psutil; keep standalone tests importable.
@@ -19,6 +21,7 @@ _SECRET = re.compile(r"(?i)(bearer\s+|x-api-key[\"']?\s*[:=]\s*[\"']?)([^\s\"']+
 
 def sanitize(value):
     text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False, default=str)
+    text = redact_proxy_credentials(text)
     return _SECRET.sub(lambda match: match.group(1) + "[REDACTED]", text)
 
 

@@ -3,15 +3,18 @@ import time
 
 import requests
 
+from ..proxy import configure_proxy
+
 
 BASE_URL = "https://www.runninghub.cn"
 
 
 class RHClient:
-    def __init__(self, api_key, timeout=600):
+    def __init__(self, api_key, timeout=600, proxy="", proxy_username="", proxy_password=""):
         self.api_key = api_key
         self.timeout = (30, None if timeout == 0 else timeout)
         self.session = requests.Session()
+        configure_proxy(self.session, proxy, proxy_username, proxy_password)
         self.headers = {"Authorization": f"Bearer {api_key}"}
 
     def get_workflow(self, workflow_id):

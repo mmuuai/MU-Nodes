@@ -26,6 +26,8 @@ from .model_nodes import (
     MmuuAIDirectLLMModelNode,
     MmuuAIImageModelNode,
     MmuuAIGoogleImageModelNode,
+    MmuuAIGeminiVideoUploadNode,
+    MmuuAIGeminiVideoLLMNode,
     MmuuAILLMModelNode,
 )
 from .resolution.resolution_selector_v2 import MmuuAIResolutionSelectorV2
@@ -59,6 +61,8 @@ NODE_CLASS_MAPPINGS = {
     "MmuuAILLMModelNodeV002": MmuuAIDirectLLMModelNode,
     "MmuuAIImageModelNodeV002": MmuuAIDirectImageModelNode,
     "MmuuAIGoogleImageModelNodeV001": MmuuAIGoogleImageModelNode,
+    "MmuuAIGeminiVideoUploadNodeV001": MmuuAIGeminiVideoUploadNode,
+    "MmuuAIGeminiVideoLLMNodeV001": MmuuAIGeminiVideoLLMNode,
     "MmuuAIResolutionSelectorV2": MmuuAIResolutionSelectorV2,
     "MmuuAIAspectRatioFromDimensionsV001": MmuuAIAspectRatioFromDimensionsV001,
     "MmuuAIFrameCountCalculatorV001": MmuuAIFrameCountCalculatorV001,
@@ -88,6 +92,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "MmuuAILLMModelNodeV002": "MU｜LLM模型",
     "MmuuAIImageModelNodeV002": "MU｜图片模型",
     "MmuuAIGoogleImageModelNodeV001": "MU｜Google图片模型",
+    "MmuuAIGeminiVideoUploadNodeV001": "MU｜G视频上传",
+    "MmuuAIGeminiVideoLLMNodeV001": "MU｜G视频LLM模型",
     "MmuuAIResolutionSelectorV2": "MU｜尺寸选择器 V2",
     "MmuuAIAspectRatioFromDimensionsV001": "MU｜宽高比判断",
     "MmuuAIFrameCountCalculatorV001": "MU｜时长与帧数计算",

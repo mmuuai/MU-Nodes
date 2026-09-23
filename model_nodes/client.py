@@ -5,6 +5,8 @@ from urllib.parse import urljoin, urlsplit
 
 import requests
 
+from ..proxy import configure_proxy, redact_proxy_credentials
+
 
 BASE_URL = "https://api.mmuu.uk"
 SUPPORTED_BASE_URLS = ("https://api.mmuu.uk", "https://api.mmuu.ai")
@@ -56,6 +58,7 @@ class UpstreamHTTPError(RuntimeError):
 
 def sanitize(value):
     text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False, default=str)
+    text = redact_proxy_credentials(text)
     return _DATA_URI.sub("[IMAGE_DATA_REMOVED]", _SECRET.sub("[REDACTED]", text))
 
 
@@ -113,10 +116,11 @@ def extract_text(payload):
 
 
 class UKClient:
-    def __init__(self, api_key, timeout, base_url=BASE_URL):
+    def __init__(self, api_key, timeout, base_url=BASE_URL, proxy="", proxy_username="", proxy_password=""):
         self.wait_timeout = None if timeout == 0 else timeout
         self.timeout = (UPLOAD_TIMEOUT_SECONDS, None if timeout == 0 else timeout)
         self.session = requests.Session()
+        configure_proxy(self.session, proxy, proxy_username, proxy_password)
         self.headers = {"Authorization": f"Bearer {api_key}"}
         parsed = urlsplit(str(base_url or "").strip())
         if parsed.scheme != "https" or not parsed.hostname or parsed.query or parsed.fragment:

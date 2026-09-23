@@ -4,6 +4,7 @@ from ..model_nodes.client import sanitize
 from ..model_nodes.common import KEY_ADVERTISEMENT, api_key_from_value, raw_response
 from ..model_nodes.mmuuai_client import MmuuAIClient
 from ..model_nodes.mmuuai_media import uploaded_file, video_upload
+from ..proxy import PROXY_ADDRESS, PROXY_PASSWORD, PROXY_USERNAME, proxy_input_fields
 
 
 MODEL_NAMES = {
@@ -31,6 +32,7 @@ class MmuuAIDirectMediaParserNode:
                 "轮询间隔（秒）": ("INT", {"default": 2, "min": 1, "max": 60, "step": 1}),
                 "超时时间（秒）": ("INT", {"default": 3600, "min": 60, "max": 2147483647, "step": 1}),
                 "关键说明": (KEY_INFO, {"default": KEY_INFO[0]}),
+                **proxy_input_fields(),
             },
             "optional": {
                 "视频文件": ("VIDEO",),
@@ -52,7 +54,9 @@ class MmuuAIDirectMediaParserNode:
         if not source_url and not has_video and not has_audio:
             return ("", "", "", "", "")
         client = MmuuAIClient(
-            api_key_from_value(values["key"]), int(values["超时时间（秒）"])
+            api_key_from_value(values["key"]), int(values["超时时间（秒）"]),
+            proxy=values.get(PROXY_ADDRESS, ""), proxy_username=values.get(PROXY_USERNAME, ""),
+            proxy_password=values.get(PROXY_PASSWORD, ""),
         )
         try:
             resource = client.resolve_model(mode, "", MODEL_NAMES)

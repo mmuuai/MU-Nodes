@@ -4,6 +4,7 @@ from .mmuuai_client import MmuuAIClient
 from .mmuuai_media import uploaded_file, video_upload
 from .mmuuai_parameters import build_parameters, upload_parameter
 from .models import LLM_MODEL_IDS
+from ..proxy import PROXY_ADDRESS, PROXY_PASSWORD, PROXY_USERNAME, proxy_input_fields
 
 
 class MmuuAIDirectLLMModelNode:
@@ -29,6 +30,7 @@ class MmuuAIDirectLLMModelNode:
                 "回答详细度（GPT）": choice(("自动（模型默认）", "简洁", "标准", "详细")),
                 "推理模式（统一响应）": choice(("标准", "专业")),
                 "超时时间（秒，0不限）": ("INT", {"default": 600, "min": 0, "max": 2147483647, "step": 1}),
+                **proxy_input_fields(),
             },
             "optional": optional,
         }
@@ -39,7 +41,9 @@ class MmuuAIDirectLLMModelNode:
 
     def execute(self, **values):
         client = MmuuAIClient(
-            api_key_from_value(values["key"]), values["超时时间（秒，0不限）"]
+            api_key_from_value(values["key"]), values["超时时间（秒，0不限）"],
+            proxy=values.get(PROXY_ADDRESS, ""), proxy_username=values.get(PROXY_USERNAME, ""),
+            proxy_password=values.get(PROXY_PASSWORD, ""),
         )
         resource = client.resolve_model(
             values["模型"], values["自定义模型名称或ID"], LLM_MODEL_IDS
